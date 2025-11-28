@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF文本检索与高亮工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+</head>
+<body>
+    <div class="main-layout">
+        <!-- 侧边栏控制面板 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>PDF文本检索与高亮</h1>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="control-group">
+                    <h3>1. 上传文件</h3>
+                    <label for="pdf-upload" class="upload-btn">选择PDF文件</label>
+                    <input type="file" id="pdf-upload" accept="application/pdf">
+                    <div id="file-name" class="file-name">未选择文件</div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>2. 检索设置</h3>
+                    <input type="text" id="search-term" placeholder="输入要检索的词语">
+                    
+                    <div class="search-options">
+                        <label>
+                            <input type="checkbox" id="case-sensitive"> 区分大小写
+                        </label>
+                        <label>
+                            <input type="checkbox" id="debug-mode"> 调试模式
+                        </label>
+                    </div>
+                    
+                    <button id="search-btn" disabled class="primary-btn">检索并高亮</button>
+                    <button id="clear-btn" disabled class="secondary-btn">清除高亮</button>
+                    
+                    <div class="search-navigation" id="search-navigation" style="display: none;">
+                        <div class="nav-label">搜索结果导航</div>
+                        <div class="nav-controls">
+                            <button id="prev-result" disabled>上一个</button>
+                            <span id="result-count">0/0</span>
+                            <button id="next-result" disabled>下一个</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>3. 高亮选项</h3>
+                    <div class="highlight-mode">
+                        <label>
+                            <input type="radio" name="highlight-mode" value="overlay" checked> 直接高亮显示
+                        </label>
+                        <label>
+                            <input type="radio" name="highlight-mode" value="new-pdf"> 生成高亮PDF
+                        </label>
+                    </div>
+                    
+                    <div class="highlight-color-picker">
+                        <label for="highlight-color">高亮颜色</label>
+                        <input type="color" id="highlight-color" value="#ffff00">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>4. 导出文件</h3>
+                    <button id="download-btn" disabled class="download-btn-style">下载高亮后的PDF</button>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="pdf-viewers">
+                <div class="pdf-container">
+                    <div class="pdf-header">
+                        <h2>原始PDF</h2>
+                        <div class="pdf-controls">
+                            <button id="prev-page-original" disabled>◀</button>
+                            <span id="page-num-original">0/0</span>
+                            <button id="next-page-original" disabled>▶</button>
+                        </div>
+                    </div>
+                    <div id="original-pdf-container" class="pdf-content">
+                        <div class="placeholder">请上传PDF文件</div>
+                    </div>
+                </div>
+                
+                <div class="pdf-container">
+                    <div class="pdf-header">
+                        <h2>高亮标注后的PDF</h2>
+                        <div class="pdf-controls">
+                            <button id="prev-page-highlighted" disabled>◀</button>
+                            <span id="page-num-highlighted">0/0</span>
+                            <button id="next-page-highlighted" disabled>▶</button>
+                        </div>
+                    </div>
+                    <div id="highlighted-pdf-container" class="pdf-content">
+                        <div class="placeholder">请先检索并高亮文本</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 加载提示 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>处理中，请稍候...</p>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
