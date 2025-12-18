@@ -95,3 +95,13 @@ PDF文本检索与高亮工具/
 ## 许可证
 
 MIT License
+
+## OCR配置
+需要本地配置Tesseract实现OCR，下载可访问以下链接
+
+[Home · UB-Mannheim/tesseract Wiki](https://github.com/UB-Mannheim/tesseract/wiki)
+
+使用过程中请将tesseracr添加到环境变量，如需识别中文请在[https://github.com/tesseract-ocr/tessdata/blob/main/chi_sim.traineddata](https://github.com/tesseract-ocr/tessdata/blob/main/chi_sim.traineddata)下载相关中文资源
+
+注意系统变量TESSDATA_PREFIX需要指向Tesseract-OCR中的tessdata文件夹，否则将报错
+
