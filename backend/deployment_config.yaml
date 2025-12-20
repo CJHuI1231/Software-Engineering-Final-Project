@@ -1,0 +1,210 @@
+# NLP服务部署配置文件
+
+# 应用配置
+app:
+  name: "NLP Service"
+  version: "1.0.0"
+  description: "NLP处理服务"
+  
+  # API配置
+  api:
+    host: "0.0.0.0"
+    port: 8000
+    debug: false
+    max_content_length: 16MB
+    
+    # CORS配置
+    cors:
+      allow_origins: ["*"]
+      allow_credentials: true
+      allow_methods: ["*"]
+      allow_headers: ["*"]
+    
+    # 认证配置
+    auth:
+      enabled: false
+      secret_key: "your-secret-key-here"
+      algorithm: "HS256"
+      access_token_expire_minutes: 30
+
+# 模型配置
+models:
+  entity_recognition:
+    default_model: "spaCy + transformers"
+    max_batch_size: 10
+    timeout: 30  # 秒
+    
+  summary:
+    default_method: "auto"
+    max_summary_length: 150
+    min_summary_length: 30
+    max_batch_size: 5
+    timeout: 20  # 秒
+
+# 缓存配置
+cache:
+  enabled: true
+  type: "redis"  # redis, memory, file
+  redis:
+    host: "redis"
+    port: 6379
+    db: 0
+    password: ""
+    ttl: 3600  # 秒
+  memory:
+    max_size: 100  # 最大缓存项数
+    ttl: 3600  # 秒
+
+# 数据库配置（如果需要）
+database:
+  type: "sqlite"  # sqlite, postgresql, mysql
+  sqlite:
+    path: "./data/nlp.db"
+  postgresql:
+    host: "localhost"
+    port: 5432
+    database: "nlp_service"
+    username: "nlp_user"
+    password: "nlp_password"
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "nlp_service"
+    username: "nlp_user"
+    password: "nlp_password"
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/nlp_service.log"
+  max_size: 10MB  # 单个日志文件最大大小
+  backup_count: 5  # 保留的日志文件数量
+  
+  # 日志轮转配置
+  rotation:
+    when: "midnight"  # 按天轮转
+    interval: 1  # 每天轮转
+
+# 性能配置
+performance:
+  # 并行处理配置
+  parallel:
+    enabled: true
+    max_workers: 4  # 最大工作线程数
+    
+  # 内存配置
+  memory:
+    limit: 2GB  # 内存限制
+    warning_threshold: 80%  # 警告阈值
+    
+  # 响应超时配置
+  timeouts:
+    request: 30  # 请求超时（秒）
+    connection: 10  # 连接超时（秒）
+
+# 安全配置
+security:
+  # 输入验证
+  input_validation:
+    max_text_length: 10000  # 最大文本长度
+    allowed_chars: "[\\w\\s\\p{P}]"  # 允许的字符集
+    
+  # 文件上传安全
+  file_upload:
+    enabled: false  # 禁用文件上传功能
+    max_file_size: 16MB
+    allowed_extensions: [".txt", ".pdf", ".doc", ".docx"]
+    
+  # API密钥管理
+  api_keys:
+    enabled: false
+    keys: []
+    
+  # 跨域配置（已在前面的CORS配置中设置）
+
+# 监控配置
+monitoring:
+  # 健康检查
+  health_check:
+    enabled: true
+    path: "/health"
+    interval: 30  # 秒
+    
+  # 指标收集
+  metrics:
+    enabled: true
+    path: "/metrics"
+    export_interval: 60  # 秒
+    
+  # 日志收集
+  logging:
+    enabled: true
+    level: "INFO"
+
+# 部署配置
+deployment:
+  # 环境配置
+  environment: "production"  # development, staging, production
+  
+  # 容器配置
+  container:
+    name: "nlp-service"
+    restart_policy: "unless-stopped"
+    memory_limit: "2G"
+    cpu_limit: "1.0"  # CPU限制（相对值）
+    
+  # 网络配置
+  network:
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./uploads:/app/uploads"
+      - "./logs:/app/logs"
+      - "./data:/app/data"
+    
+  # 副本数量（用于生产环境）
+  replicas: 1
+
+# 开发配置
+development:
+  debug: true
+  auto_reload: true
+  log_level: "DEBUG"
+  cache:
+    enabled: false
+  database:
+    type: "sqlite"
+    sqlite:
+      path: "./dev_data/nlp_dev.db"
+
+# 生产配置
+production:
+  debug: false
+  auto_reload: false
+  log_level: "INFO"
+  cache:
+    enabled: true
+    type: "redis"
+  database:
+    type: "postgresql"
+    postgresql:
+      host: "prod-db.example.com"
+      port: 5432
+      database: "nlp_production"
+      username: "prod_user"
+      password: "prod_password"
+
+# 测试配置
+testing:
+  debug: true
+  log_level: "DEBUG"
+  cache:
+    enabled: false
+  database:
+    type: "sqlite"
+    sqlite:
+      path: "./test_data/nlp_test.db"
+
+
+

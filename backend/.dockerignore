@@ -1,0 +1,88 @@
+# Docker构建忽略文件
+
+# 忽略Python缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 忽略虚拟环境
+venv/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# 忽略测试目录
+tests/
+test_*.py
+
+# 忽略日志文件
+*.log
+logs/
+
+# 忽略上传目录
+uploads/
+
+# 忽略IDE配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 忽略Git相关文件
+.git/
+.gitignore
+.gitattributes
+
+# 忽略其他临时文件
+tmp/
+temp/
+*.tmp
+*.temp
+
+# 忽略项目特定的临时文件
+.nlp_cache/
+.cache/
+
+# 忽略Docker相关文件（除了Dockerfile和docker-compose.yml）
+!Dockerfile
+!docker-compose.yml
+!requirements.txt
+
+# 忽略文档文件
+README.md
+*.md
+docs/
+
+# 忽略配置文件（如果不需要在容器中）
+*.cfg
+*.conf
+*.ini
+*.yml
+*.yaml
+.env
+
+# 忽略Python egg信息
+*.egg-info/
+eggs/
+
+# 忽略构建目录
+build/
+dist/
+*.egg
+
+# 忽略Jupyter notebook文件
+*.ipynb
+
+# 忽略其他不需要的文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 忽略测试数据
+test_data/
+sample_data/
+
+
+
