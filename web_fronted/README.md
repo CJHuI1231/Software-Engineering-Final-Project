@@ -1,4 +1,3 @@
-# Software Engineering Final Project  
 ## PDF 智能分析系统（前端阶段）
 
 本项目是一个面向 PDF 文档的智能分析系统，目标是通过 **OCR、文本摘要生成以及知识图谱构建** 等技术，为用户提供对 PDF 内容的高效理解与结构化分析。
