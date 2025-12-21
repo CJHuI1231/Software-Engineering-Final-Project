@@ -36,28 +36,28 @@ class ErrorHandler:
         if isinstance(error, FileNotFoundError):
             return {
                 "status": "error",
-                "message": "文件未找到",
+                "message": f"文件未找到: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查文件路径是否正确"
             }
         elif isinstance(error, PermissionError):
             return {
                 "status": "error",
-                "message": "文件权限不足",
+                "message": f"文件权限不足: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查文件权限设置"
             }
         elif isinstance(error, ValueError):
             return {
                 "status": "error",
-                "message": "无效的输入参数",
+                "message": f"无效的输入参数: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查输入参数是否正确"
             }
         else:
             return {
                 "status": "error",
-                "message": "OCR处理失败",
+                "message": f"OCR处理失败: {str(error)}",
                 "details": error_info,
                 "suggestion": "请稍后重试或联系技术支持"
             }
@@ -89,28 +89,28 @@ class ErrorHandler:
         if isinstance(error, ImportError):
             return {
                 "status": "error",
-                "message": "模型依赖缺失",
+                "message": f"模型依赖缺失: {str(error)}",
                 "details": error_info,
                 "suggestion": "请安装必要的依赖包"
             }
         elif isinstance(error, RuntimeError):
             return {
                 "status": "error",
-                "message": "模型运行时错误",
+                "message": f"模型运行时错误: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查模型配置和输入数据"
             }
         elif isinstance(error, MemoryError):
             return {
                 "status": "error",
-                "message": "内存不足",
+                "message": f"内存不足: {str(error)}",
                 "details": error_info,
                 "suggestion": "请减少输入数据量或增加内存"
             }
         else:
             return {
                 "status": "error",
-                "message": "模型处理失败",
+                "message": f"模型处理失败: {str(error)}",
                 "details": error_info,
                 "suggestion": "请稍后重试或联系技术支持"
             }
@@ -142,28 +142,28 @@ class ErrorHandler:
         if isinstance(error, ValueError):
             return {
                 "status": "error",
-                "message": "无效的API参数",
+                "message": f"无效的API参数: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查API参数是否正确"
             }
         elif isinstance(error, TypeError):
             return {
                 "status": "error",
-                "message": "API参数类型错误",
+                "message": f"API参数类型错误: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查参数类型"
             }
         elif isinstance(error, AttributeError):
             return {
                 "status": "error",
-                "message": "API对象属性错误",
+                "message": f"API对象属性错误: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查对象属性和方法"
             }
         else:
             return {
                 "status": "error",
-                "message": "API处理失败",
+                "message": f"API处理失败: {str(error)}",
                 "details": error_info,
                 "suggestion": "请稍后重试或联系技术支持"
             }
@@ -195,35 +195,35 @@ class ErrorHandler:
         if isinstance(error, FileNotFoundError):
             return {
                 "status": "error",
-                "message": "文件未找到",
+                "message": f"文件未找到: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查文件路径是否正确"
             }
         elif isinstance(error, PermissionError):
             return {
                 "status": "error",
-                "message": "文件权限不足",
+                "message": f"文件权限不足: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查文件权限设置"
             }
         elif isinstance(error, IsADirectoryError):
             return {
                 "status": "error",
-                "message": "路径是目录而不是文件",
+                "message": f"路径是目录而不是文件: {str(error)}",
                 "details": error_info,
                 "suggestion": "请提供正确的文件路径"
             }
         elif isinstance(error, OSError):
             return {
                 "status": "error",
-                "message": "文件操作失败",
+                "message": f"文件操作失败: {str(error)}",
                 "details": error_info,
                 "suggestion": "请检查文件系统状态"
             }
         else:
             return {
                 "status": "error",
-                "message": "文件处理失败",
+                "message": f"文件处理失败: {str(error)}",
                 "details": error_info,
                 "suggestion": "请稍后重试或联系技术支持"
             }

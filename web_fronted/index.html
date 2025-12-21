@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF 处理工具</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<body>
+
+<!-- 第一题头 -->
+<header class="header-main">
+  <div class="brand">PDF 处理工具</div>
+</header>
+
+<!-- 第二题头 -->
+<section class="header-file">
+  <div class="file-info">
+    <span id="fileName" class="file-name">未选择文件</span>
+  </div>
+
+  <label class="upload-btn">
+    上传文件
+    <input type="file" id="pdfFile" accept=".pdf" hidden />
+  </label>
+</section>
+
+<!-- 主体 -->
+<main class="layout">
+
+  <!-- 左侧 PDF -->
+  <section class="pdf-area">
+
+  <!-- PDF 工具栏 -->
+    <div class="pdf-toolbar">
+        <button id="prevPage">◀</button>
+        <span id="pageInfo">1 / 1</span>
+        <button id="nextPage">▶</button>
+
+        <div class="zoom-controls">
+        <button id="zoomOut">−</button>
+        <span id="zoomLevel">100%</span>
+        <button id="zoomIn">＋</button>
+        </div>
+    </div>
+
+    <!-- PDF 显示容器（可滚动） -->
+    <div class="pdf-viewer" id="pdfViewer">
+        <div class="pdf-inner" id="pdfInner">
+            <canvas id="pdfCanvas"></canvas>
+        </div>
+    </div>
+
+  </section>
+
+  <!-- 右侧分析区 -->
+  <section class="analysis-area">
+
+    <!-- Tabs -->
+    <div class="analysis-tabs">
+      <button class="tab active" data-tab="output">摘要</button>
+      <button class="tab" data-tab="graph">知识图谱</button>
+    </div>
+
+    <!-- 内容区 -->
+    <div class="analysis-content">
+
+      <!-- 输出 -->
+      <div class="tab-panel active" id="output">
+        <div class="center-action">
+          <p class="hint">您的摘要文本将显示在此处</p>
+          <button id="actionBtn">生成摘要</button>
+        </div>
+      </div>
+
+      <!-- 思维导图 -->
+      <div class="tab-panel" id="graph">
+        <div class="center-action">
+          <p class="hint">知识图谱将在此生成</p>
+          <button id="actionBtnGraph">生成知识图谱</button>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script src="main.js"></script>
+</body>
+</html>

@@ -211,7 +211,7 @@ class FileUtils:
         """
         try:
             # 创建临时文件
-            with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False, encoding='utf-8') as temp_file:
                 if content:
                     temp_file.write(content)
                 temp_path = temp_file.name

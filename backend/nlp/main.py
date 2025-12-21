@@ -1,7 +1,12 @@
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .utils.config_manager import ConfigManager
-from .utils.error_handler import ErrorHandler
+from nlp.utils.config_manager import ConfigManager
+from nlp.utils.error_handler import ErrorHandler
 import logging
 import os
 from typing import Dict, Any
@@ -104,12 +109,12 @@ class NLPService:
             summary_config = nlp_config.get('summary', {})
             
             # 初始化实体识别模块
-            from .entity_recognition.entity_recognition import EntityRecognitionModel
+            from nlp.entity_recognition.entity_recognition import EntityRecognitionModel
             self.entity_recognition = EntityRecognitionModel(entity_config)
             logger.info("实体识别模块初始化成功")
             
             # 初始化摘要模块
-            from .summary.summary_model import SummaryModel
+            from nlp.summary.summary_model import SummaryModel
             self.summary = SummaryModel(summary_config)
             logger.info("摘要模块初始化成功")
             
@@ -123,14 +128,18 @@ class NLPService:
         """
         try:
             # 导入API模块
-            from .api.entity_api import router as entity_router
-            from .api.summary_api import router as summary_router
+            from nlp.api.entity_api import router as entity_router
+            from nlp.api.summary_api import router as summary_router
+            from nlp.api.pdf_api import router as pdf_router
             
             # 注册实体识别API
             self.app.include_router(entity_router, prefix="/api/nlp/entities")
             
             # 注册摘要API
             self.app.include_router(summary_router, prefix="/api/nlp/summary")
+            
+            # 注册PDF处理API
+            self.app.include_router(pdf_router)
             
             # 注册健康检查
             @self.app.get("/health")
