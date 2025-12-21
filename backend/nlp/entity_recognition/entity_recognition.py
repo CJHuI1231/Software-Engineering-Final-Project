@@ -18,7 +18,7 @@ class EntityRecognitionModel:
             # 加载Hugging Face的transformers管道
             self.transformer_pipeline = pipeline(
                 "ner", 
-                model="dslim/bert-base-NER",
+                model="ckiplab/bert-base-chinese-ner", # 原来的不能识别中文
                 aggregation_strategy="simple"
             )
             logger.info("成功加载transformers NER模型")
@@ -135,26 +135,58 @@ class EntityRecognitionModel:
         try:
             # 使用spaCy的依存解析来提取关系
             doc = self.nlp(text)
-            
             relations = []
-            for token in doc:
-                if token.dep_ in ["nsubj", "dobj", "pobj", "agent", "patient"]:
-                    # 简单的关系提取逻辑
-                    subject = None
-                    object_ = None
-                    
-                    if token.dep_ in ["nsubj", "agent"]:
-                        subject = token.text
-                    elif token.dep_ in ["dobj", "pobj", "patient"]:
-                        object_ = token.text
-                    
-                    if subject and object_:
-                        relations.append({
-                            "subject": subject,
-                            "relation": token.dep_,
-                            "object": object_,
-                            "confidence": 0.8  # 简化版，使用默认置信度
-                        })
+
+            # 改进关系提取逻辑
+            for sentence in doc.sents:
+                for token in sentence:
+                    if token.pos_ == "VERB":
+                        subject = None
+                        object_ = None
+                        relation = token.text
+
+                        for child in token.children:
+                            if child.dep_ in ["nsubj", "nsubjpass"]:
+                                subject = child.text
+                            elif child.dep_ in ["dobj", "pobj", "attr"]:
+                                object_ = child.text
+                        
+                        if not object_:
+                            # 尝试从介词短语中寻找宾语
+                            for prep in token.children:
+                                if prep.dep_ == "prep":
+                                    for pobj in prep.children:
+                                        if pobj.dep_ == "pobj":
+                                            object_ = pobj.text
+                                            relation = f"{token.text}{prep.text}"
+                                            break
+                                        
+                        if subject and object_:
+                            relations.append({
+                                "subject": subject,
+                                "relation": relation,
+                                "object": object_,
+                                "confidence": 0.8  # 简化版，使用默认置信度
+                            })
+
+            # 备用简单关系提取逻辑
+            if not relations:
+                entities = [entity for entity in doc.ents]
+                for i, entity1 in enumerate(entities):
+                    for entity2 in entities[i+1:]:
+
+                        start = min(entity1.end, entity2.end)
+                        end = max(entity1.start, entity2.start)
+                        span = doc[start:end]
+                        verbs = [token for token in span if token.pos_ == "VERB"]
+
+                        if verbs:
+                            relations.append({
+                                "subject": entity1.text,
+                                "relation": verbs[0].text,
+                                "object": entity2.text,
+                                "confidence": 0.5  # 简化版，使用较低置信度
+                            })
             
             logger.info(f"提取到 {len(relations)} 个实体关系")
             return relations

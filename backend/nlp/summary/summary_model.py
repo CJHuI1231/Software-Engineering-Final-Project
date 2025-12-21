@@ -114,14 +114,14 @@ class SummaryModel:
         # 尝试加载transformers模型
         if HAS_TRANSFORMERS:
             try:
-                transformer_key = "bart-large-cnn"
+                transformer_key = "OpenMOSS-Team/bart-base-chinese" # 原来的不能识别中文
                 if self.model_cache:
                     self.transformer_pipeline = self.model_cache.get_model(transformer_key)
                 if not self.transformer_pipeline:
                     self.transformer_pipeline = pipeline(
                         "summarization",
-                        model="facebook/bart-large-cnn",
-                        tokenizer="facebook/bart-large-cnn"
+                        model="OpenMOSS-Team/bart-base-chinese",
+                        tokenizer="OpenMOSS-Team/bart-base-chinese"
                     )
                     if self.model_cache:
                         self.model_cache.cache_model(transformer_key, self.transformer_pipeline)
@@ -227,10 +227,15 @@ class SummaryModel:
                     return cached_result
             
             # 使用summa库的TextRank实现
+            summary = None
             if words:
                 summary = summarizer.summarize(text, words=words)
             else:
                 summary = summarizer.summarize(text, ratio=ratio)
+
+            if not summary:
+                logger.warning("TextRank未能生成摘要，使用简化方法回退")
+                summary = self._generate_simple_summary(text)
             
             # 缓存结果
             self.cache_manager.set_cache(cache_key, summary)
@@ -242,6 +247,26 @@ class SummaryModel:
             logger.error(f"TextRank摘要生成失败: {e}")
             return ""
     
+    def _generate_simple_summary(self, text: str, max_length: int = 100, min_length: int = 30) -> str:
+        """
+        简化的摘要生成方法（用于回退）
+        
+        Args:
+            text: 原始文本
+            max_length: 摘要最大长度
+            min_length: 摘要最小长度
+            
+        Returns:
+            生成的摘要
+        """
+        if not text or not isinstance(text, str):
+            return ""
+        
+        # 简单的摘要生成逻辑：取前max_length个字符
+        summary = text[:max_length] + "..." if len(text) > max_length else text
+        logger.info(f"使用简化方法生成摘要，长度: {len(summary)}")
+        return summary
+
     def select_best_summary(self, text: str, max_length: int = 150, min_length: int = 30) -> str:
         """
         根据文本特性选择最佳摘要方法
@@ -292,15 +317,44 @@ class SummaryModel:
             return {"keywords": [], "summary": ""}
         
         try:
-            # 提取关键词
-            keywords_list = keywords.keywords(text, words=num_keywords).split('\n')
-            keywords_list = [kw.strip() for kw in keywords_list if kw.strip()]
+            keywords_list = []
+
+            # 首先尝试使用summa提取关键词
+            if HAS_KEYWORDS:
+                try:
+                    raw_keywords = keywords.keywords(text, words=num_keywords)
+                    if raw_keywords:
+                        keywords_list = raw_keywords.split('\n')
+                        keywords_list = [kw.strip() for kw in keywords_list if kw.strip()]
+                except Exception as e:
+                    logger.warning(f"summa关键词提取失败: {e}")
+            
+            # 如果summa没有提取到足够的关键词，使用spaCy提取实体
+            if len(keywords_list) < num_keywords and self.nlp:
+                doc = self.nlp(text)
+                entities = [ent.text for ent in doc.ents]
+                # 添加未重复的实体
+                for ent in entities:
+                    if ent not in keywords_list:
+                        keywords_list.append(ent)
+                    if len(keywords_list) >= num_keywords:
+                        break
+            
+            # 如果仍然不够，提取名词
+            if len(keywords_list) < num_keywords and self.nlp:
+                doc = self.nlp(text)
+                nouns = [token.text for token in doc if token.pos_ in ["NOUN", "PROPN"]]
+                for noun in nouns:
+                    if noun not in keywords_list and len(noun) > 1:
+                        keywords_list.append(noun)
+                    if len(keywords_list) >= num_keywords:
+                        break
+            
+            # 限制关键词数量
+            keywords_list = keywords_list[:num_keywords]
             
             # 生成基于关键词的摘要
-            if keywords_list:
-                keyword_summary = " | ".join(keywords_list)
-            else:
-                keyword_summary = ""
+            keyword_summary = " | ".join(keywords_list) if keywords_list else ""
             
             result = {
                 "keywords": keywords_list,
