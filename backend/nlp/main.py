@@ -130,12 +130,16 @@ class NLPService:
             # 导入API模块
             from nlp.api.entity_api import router as entity_router
             from nlp.api.summary_api import router as summary_router
+            from nlp.api.pdf_api import router as pdf_router
             
             # 注册实体识别API
             self.app.include_router(entity_router, prefix="/api/nlp/entities")
             
             # 注册摘要API
             self.app.include_router(summary_router, prefix="/api/nlp/summary")
+            
+            # 注册PDF处理API
+            self.app.include_router(pdf_router)
             
             # 注册健康检查
             @self.app.get("/health")

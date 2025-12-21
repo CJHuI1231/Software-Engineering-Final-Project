@@ -1,107 +1,151 @@
-# PDF文本检索与高亮工具
+# PDF 处理与 NLP 分析系统
 
-这是一个基于Web的PDF文本检索与高亮标注工具，可以帮助用户在PDF文件中查找特定词语并进行高亮标注，同时提供原始PDF和高亮后PDF的对比显示。
+这是一个完整的PDF文档处理与自然语言处理系统，整合了PDF解析、文本提取、摘要生成、实体识别和知识图谱可视化功能。
 
 ## 功能特点
 
-- 📄 **PDF文件上传**：支持上传本地PDF文件
-- 🔍 **文本检索**：在PDF文件中搜索指定词语
-- 🖍️ **高亮标注**：自动高亮标注所有匹配的文本
-- 📊 **双窗口对比**：并排显示原始PDF和高亮后的PDF
-- 📥 **下载功能**：支持下载高亮标注后的PDF文件
-- 📱 **响应式设计**：适配不同屏幕尺寸
+1. **PDF 处理**
+   - 支持直接文本提取和OCR识别
+   - 自动判断PDF类型并选择最优解析方式
+   - 支持大文件处理（最高100MB）
 
-## 技术栈
+2. **摘要生成**
+   - 支持多种摘要方法（BART、TextRank、自动选择）
+   - 提供摘要质量评估指标
 
-- HTML5
-- CSS3
-- JavaScript (ES6+)
-- PDF.js (用于PDF渲染和文本提取)
-- PDF-lib (用于PDF修改和高亮标注)
+3. **实体识别**
+   - 识别文本中的人物、组织、日期、地点等实体
+   - 支持实体关系提取
+
+4. **知识图谱**
+   - 可视化实体关系
+   - 交互式图谱展示
+
+## 系统架构
+
+- **后端**: FastAPI + NLP服务
+- **前端**: HTML/CSS/JavaScript + PDF.js
+- **PDF处理**: pdf2image + pytesseract + pdfplumber
+- **NLP处理**: transformers + spacy + NLTK
+
+## 安装与设置
+
+### 系统要求
+
+1. Python 3.8+
+2. Tesseract OCR
+3. Poppler（用于pdf2image）
+
+### 安装步骤
+
+1. 克隆或下载项目
+2. 安装Python依赖：
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. 安装系统依赖：
+
+   **Windows**:
+   - 安装 Tesseract OCR：从 [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) 下载并安装
+   - 安装 Poppler：从 [poppler-windows](https://github.com/oschwartz10612/poppler-windows) 下载并解压，将bin目录添加到PATH
+
+   **macOS**:
+   ```bash
+   brew install tesseract poppler
+   ```
+
+   **Linux (Ubuntu)**:
+   ```bash
+   sudo apt update
+   sudo apt install tesseract-ocr tesseract-ocr-chi-sim poppler-utils
+   ```
 
 ## 使用方法
 
-1. **上传PDF文件**：
-   - 点击"选择PDF文件"按钮
-   - 从本地选择要处理的PDF文件
-   - 文件上传后，左侧窗口将显示原始PDF
+### 启动后端服务
 
-2. **检索和高亮文本**：
-   - 在搜索框中输入要查找的词语
-   - 可选：勾选"区分大小写"进行精确匹配
-   - 可选：勾选"调试模式"查看高亮位置的详细信息
-   - 选择高亮模式：
-     - **直接高亮显示**：在原始PDF上覆盖高亮层（类似WPS查找功能）
-     - **生成高亮PDF**：创建一个新的PDF文件，包含高亮标注
-   - 可选：选择高亮颜色（默认为黄色）
-   - 点击"检索并高亮"按钮
-   - 系统将在PDF中搜索所有匹配的文本并进行高亮标注
+```bash
+python start_backend.py
+```
 
-3. **浏览搜索结果**：
-   - 使用"上一个"和"下一个"按钮在搜索结果之间跳转
-   - 当前选中的结果将以红色高亮显示
-   - 其他结果使用您选择的颜色高亮显示
+可选参数：
+- `--host`: 服务器主机地址（默认: 0.0.0.0）
+- `--port`: 服务器端口（默认: 8000）
+- `--reload`: 启用自动重载（开发模式）
+- `--workers`: 工作进程数（默认: 4）
 
-4. **浏览PDF**：
-   - 使用每个窗口下方的"上一页"和"下一页"按钮浏览PDF内容
-   - 页码信息显示当前页面和总页数
+### 启动前端服务
 
-5. **下载高亮PDF**：
-   - 完成高亮标注后（仅在"生成高亮PDF"模式下）
-   - 点击"下载高亮后的PDF"按钮
-   - 下载的PDF文件将包含所有高亮标注
+```bash
+python start_frontend.py
+```
 
-6. **清除高亮**：
-   - 点击"清除高亮"按钮可以清除当前的高亮标注
-   - 可以进行新的搜索
+可选参数：
+- `--port`: 前端服务器端口（默认: 8080）
+- `--no-browser`: 不自动打开浏览器
+
+### 使用系统
+
+1. 在浏览器中访问 `http://localhost:8080`
+2. 点击"上传文件"按钮，选择PDF文件
+3. 等待PDF处理完成
+4. 点击"生成摘要"按钮获取文档摘要
+5. 切换到"知识图谱"选项卡，点击"生成知识图谱"按钮可视化实体关系
+
+## API文档
+
+后端API文档可在 `http://localhost:8000/docs` 查看
+
+主要API端点：
+- `POST /api/pdf/upload` - 上传PDF文件
+- `POST /api/pdf/summary` - 生成摘要
+- `POST /api/pdf/entities` - 提取实体
+- `POST /api/pdf/knowledge_graph` - 生成知识图谱
 
 ## 项目结构
 
 ```
-PDF文本检索与高亮工具/
-├── index.html          # 主HTML文件
-├── styles.css          # 样式文件
-├── script.js           # JavaScript功能实现
-└── README.md           # 项目说明文档
+Software-Engineering-Final-Project/
+├── backend/                     # 后端代码
+│   ├── nlp/                    # NLP服务
+│   │   ├── api/                # API路由
+│   │   │   ├── pdf_api.py      # PDF处理API
+│   │   │   ├── summary_api.py  # 摘要生成API
+│   │   │   └── entity_api.py   # 实体识别API
+│   │   ├── entity_recognition/   # 实体识别模块
+│   │   ├── summary/            # 摘要生成模块
+│   │   └── utils/              # 工具模块
+│   └── OCR/                   # PDF OCR模块
+│       └── PDF_OCR.py          # PDF解析器
+├── web_fronted/                # 前端代码
+│   ├── index.html              # 主页面
+│   ├── main.js                 # JavaScript逻辑
+│   └── styles.css              # 样式表
+├── start_backend.py            # 后端启动脚本
+├── start_frontend.py           # 前端启动脚本
+├── requirements.txt            # Python依赖
+└── README.md      # 本文档
 ```
 
-## 浏览器兼容性
+## 进度跟踪
 
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+项目整合进度详见 `INTEGRATION_PROGRESS.md`
 
-## 注意事项
+## 常见问题
 
-1. 本工具完全在浏览器端运行，不会上传文件到服务器，保证文件隐私安全
-2. 处理大型PDF文件时可能需要较长时间，请耐心等待
-3. 高亮标注基于文本匹配，对于扫描版PDF（图片格式）可能无法正常工作
-4. 建议使用现代浏览器以获得最佳体验
-5. **调试模式**：如果高亮位置不准确，可以启用调试模式查看详细的坐标信息，帮助诊断问题
-6. **两种高亮模式对比**：
-   - 直接高亮显示：实时快速，适合快速查找，但不能下载
-   - 生成高亮PDF：生成永久标注的PDF文件，可以下载和分享
+1. **Tesseract找不到语言包**
+   - 确保已安装中文语言包（chi_sim）
+   - 检查TESSDATA_PREFIX环境变量
 
-## 开发说明
+2. **PDF处理失败**
+   - 确保Poppler已正确安装并在PATH中
+   - 尝试降低DPI设置
 
-如需修改或扩展功能，可以参考以下主要函数：
+3. **NLP处理速度慢**
+   - 尝试使用更小的PDF文件
+   - 考虑使用GPU加速（如果可用）
 
-- `handleFileSelect()`: 处理文件上传
-- `searchAndHighlight()`: 搜索和高亮文本
-- `createHighlightedPdf()`: 创建高亮PDF
-- `renderPage()`: 渲染PDF页面
+## 贡献
 
-## 许可证
-
-MIT License
-
-## OCR配置
-需要本地配置Tesseract实现OCR，下载可访问以下链接
-
-[Home · UB-Mannheim/tesseract Wiki](https://github.com/UB-Mannheim/tesseract/wiki)
-
-使用过程中请将tesseracr添加到环境变量，如需识别中文请在[https://github.com/tesseract-ocr/tessdata/blob/main/chi_sim.traineddata](https://github.com/tesseract-ocr/tessdata/blob/main/chi_sim.traineddata)下载相关中文资源
-
-注意系统变量TESSDATA_PREFIX需要指向Tesseract-OCR中的tessdata文件夹，否则将报错
-
+欢迎提交问题报告和功能请求！
