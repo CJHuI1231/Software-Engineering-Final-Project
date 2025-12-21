@@ -73,6 +73,21 @@ database:
     username: "nlp_user"
     password: "nlp_password"
 
+# Neo4j图数据库配置
+graph_storage:
+  neo4j:
+    uri: "bolt://localhost:7687"      # 本地开发使用localhost
+    # uri: "bolt://neo4j:7687"        # Docker环境使用neo4j服务名
+    user: "neo4j"
+    password: "password123"
+    database: "neo4j"
+    max_connection_pool_size: 50
+    connection_timeout: 30.0
+    encrypted: false
+  auto_connect: false                  # 启动时是否自动连接
+  create_indexes_on_startup: true      # 启动时是否创建索引
+  log_level: "INFO"
+
 # 日志配置
 logging:
   level: "INFO"
