@@ -50,6 +50,9 @@ COPY . .
 # 10. 创建必要的运行时目录
 RUN mkdir -p uploads logs cache
 
+# 11. 确保 document_system 可被导入
+ENV PYTHONPATH="/app:${PYTHONPATH}"
+
 # 11. 安全性：创建非root用户并切换
 RUN useradd --create-home --shell /bin/bash app && \
     chown -R app:app /app

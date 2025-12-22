@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
+import os
 import mysql.connector
 from mysql.connector import Error
 import logging
 
-# 数据库配置
+# 数据库配置 - 优先从环境变量读取（Docker部署），否则使用默认值（本地开发）
 DB_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'user': 'root',
-    'password': '12345678',
-    'database': 'rjgc',
+    'host': os.environ.get('MYSQL_HOST', 'localhost'),
+    'port': int(os.environ.get('MYSQL_PORT', 3306)),
+    'user': os.environ.get('MYSQL_USER', 'root'),
+    'password': os.environ.get('MYSQL_PASSWORD', '12345678'),
+    'database': os.environ.get('MYSQL_DATABASE', 'rjgc'),
     'charset': 'utf8mb4',
     'autocommit': True
 }

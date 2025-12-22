@@ -10,6 +10,7 @@ services:
     volumes:
       # 挂载代码目录以便开发时修改
       - ./backend:/app/backend
+      - ./document_system:/app/document_system
       - ./web_fronted:/app/web_fronted
       # 数据目录
       - ${UPLOAD_DIR:-./uploads}:/app/uploads
@@ -17,13 +18,23 @@ services:
       - cache:/app/cache
     environment:
       - PYTHONUNBUFFERED=1
+      # Neo4j配置
       - NEO4J_URI=${NEO4J_URI:-bolt://neo4j:7687}
       - NEO4J_USER=${NEO4J_USER:-neo4j}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD:-password123}
       - NEO4J_DATABASE=${NEO4J_DATABASE:-neo4j}
+      # Redis配置
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis123}
+      # MySQL配置
+      - MYSQL_HOST=${MYSQL_HOST:-mysql}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password123}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-rjgc}
+      # NLP配置
       - OCR_LANG=${OCR_LANG:-chi_sim+eng}
       - OCR_DPI=${OCR_DPI:-200}
       - SUMMARY_DEFAULT_METHOD=${SUMMARY_DEFAULT_METHOD:-auto}
@@ -34,8 +45,12 @@ services:
       - CACHE_TYPE=${CACHE_TYPE:-redis}
     restart: unless-stopped
     depends_on:
-      - redis
-      - neo4j
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      neo4j:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -88,10 +103,36 @@ services:
       timeout: 10s
       retries: 5
 
+  # MySQL数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: nlp-mysql
+    ports:
+      - "${MYSQL_EXTERNAL_PORT:-3306}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD:-password123}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-rjgc}
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./SQL:/docker-entrypoint-initdb.d:ro  # 自动执行初始化脚本
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD:-password123}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 # 定义命名卷
 volumes:
   redis_data:
   neo4j_data:
   neo4j_logs:
   neo4j_plugins:
+  mysql_data:
   cache:
