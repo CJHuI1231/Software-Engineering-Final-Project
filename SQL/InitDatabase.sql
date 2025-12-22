@@ -1,0 +1,7 @@
+create database if not exists rjgc
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci; 
+
+USE rjgc;
+
+SET sql_mode = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
