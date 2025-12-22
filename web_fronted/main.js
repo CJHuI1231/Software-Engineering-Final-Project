@@ -5,8 +5,10 @@ let scale = 1.0;
 let extractedText = "";
 let fileId = null;
 
-// API基础URL
-const API_BASE_URL = "http://localhost:8000/api";
+// API基础URL - 根据环境自动检测
+const API_BASE_URL = window.location.hostname === 'localhost' && window.location.port === '8080' 
+    ? "/api"  // Docker环境，通过nginx代理
+    : "http://localhost:8000/api";  // 本地开发环境
 
 const canvas = document.getElementById("pdfCanvas");
 const ctx = canvas.getContext("2d");

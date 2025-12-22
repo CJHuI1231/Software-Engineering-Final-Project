@@ -56,21 +56,6 @@ def parse_arguments():
     
     return parser.parse_args()
 
-def check_dependencies():
-    """检查必要的依赖项"""
-    try:
-        import fastapi
-        import uvicorn
-        import pdf2image
-        import pytesseract
-        import pdfplumber
-        logger.info("所有必要的依赖项检查通过")
-        return True
-    except ImportError as e:
-        logger.error(f"缺少依赖项: {e}")
-        logger.error("请运行 'pip install -r requirements.txt' 安装依赖项")
-        return False
-
 def check_system_requirements():
     """检查系统要求"""
     try:
@@ -80,12 +65,18 @@ def check_system_requirements():
         logger.info("Tesseract OCR 可用")
         
         # 检查Poppler (pdf2image需要)
-        import pdf2image
-        # 尝试转换一个简单的测试图像
-        test_image = pdf2image.pdf2image._page_count_check(os.devnull)
-        logger.info("Poppler 可用")
+        try:
+            import pdf2image
+            logger.info("Poppler 可用")
+        except ImportError as e:
+            logger.error(f"无法导入pdf2image模块: {e}")
+            logger.error("请安装pdf2image库: pip install pdf2image")
+            return False
         
         return True
+    except ImportError as e:
+        logger.error(f"系统要求检查失败: {e}")
+        return False
     except Exception as e:
         logger.error(f"系统要求检查失败: {e}")
         logger.error("请确保已安装 Tesseract OCR 和 Poppler")
@@ -95,8 +86,17 @@ def main():
     """主函数"""
     args = parse_arguments()
     
-    # 检查依赖项
-    if not check_dependencies():
+    try:
+        # 直接尝试导入所有必要的模块
+        import fastapi
+        import uvicorn
+        import pdf2image
+        import pytesseract
+        import pdfplumber
+        logger.info("所有必要的依赖项检查通过")
+    except ImportError as e:
+        logger.error(f"缺少依赖项: {e}")
+        logger.error("请运行 'pip install -r requirements.txt' 安装依赖项")
         sys.exit(1)
     
     # 检查系统要求
@@ -111,8 +111,13 @@ def main():
         from backend.nlp.main import create_app
         app = create_app()
         logger.info("应用创建成功")
+    except ImportError as e:
+        logger.error(f"导入错误: {e}")
+        logger.error("请确保已安装所有必要的依赖项")
+        sys.exit(1)
     except Exception as e:
         logger.error(f"应用创建失败: {e}")
+        logger.error("请检查配置和依赖项")
         sys.exit(1)
     
     # 启动服务器

@@ -110,12 +110,12 @@ class NLPService:
             
             # 初始化实体识别模块
             from nlp.entity_recognition.entity_recognition import EntityRecognitionModel
-            self.entity_recognition = EntityRecognitionModel(entity_config)
+            self.entity_recognition = EntityRecognitionModel()
             logger.info("实体识别模块初始化成功")
             
             # 初始化摘要模块
             from nlp.summary.summary_model import SummaryModel
-            self.summary = SummaryModel(summary_config)
+            self.summary = SummaryModel()
             logger.info("摘要模块初始化成功")
             
         except Exception as e:
