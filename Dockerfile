@@ -13,10 +13,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     DEBIAN_FRONTEND=noninteractive
 
 # 4. 配置 APT 使用国内镜像源 (强烈建议保留，否则安装 OCR 会很慢)
-# 注意：这里假设基础镜像是基于 Debian Bookworm (Python 3.11 默认)
-# 如果构建报错找不到文件，可以尝试注释掉这两行 sed 命令
-#RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
- #   sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources
+# 注意：某些包在阿里云镜像中可能不存在，使用官方源更稳定
+# RUN echo "deb [trusted=yes] https://mirrors.aliyun.com/debian/ bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
+#     echo "deb [trusted=yes] https://mirrors.aliyun.com/debian/ bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+#     echo "deb [trusted=yes] https://mirrors.aliyun.com/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list
 
 # 5. 安装系统依赖 (合并命令以减少镜像层数)
 RUN apt-get update && apt-get install -y --no-install-recommends \

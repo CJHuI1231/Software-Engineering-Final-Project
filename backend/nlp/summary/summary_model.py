@@ -1,6 +1,10 @@
+import os
 import logging
 import re
 from typing import List, Dict, Any
+
+# 设置 Hugging Face 镜像（解决国内访问问题）
+os.environ['HF_ENDPOINT'] = os.environ.get('HF_ENDPOINT', 'https://hf-mirror.com')
 
 # 尝试导入可选依赖
 try:
@@ -35,19 +39,19 @@ except ImportError:
 
 # 导入工具类
 try:
-    from ..utils.cache_manager import (
-        CacheManager, 
-        ModelCacheManager, 
+    from nlp.utils.cache_manager import (
+        CacheManager,
+        ModelCacheManager,
         BatchProcessingManager,
         performance_monitor,
         memory_monitor,
         async_processing
     )
-    from ..utils.config_manager import ConfigManager
+    from nlp.utils.config_manager import ConfigManager
     HAS_UTILS = True
 except ImportError:
     HAS_UTILS = False
-from ..utils.config_manager import ConfigManager
+from nlp.utils.config_manager import ConfigManager
 
 # 下载必要的NLTK数据
 try:

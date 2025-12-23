@@ -1,12 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from ..entity_recognition.entity_recognition import EntityRecognitionModel
-from ..utils.cache_manager import (
-    CacheManager, 
+from nlp.entity_recognition.entity_recognition import EntityRecognitionModel
+from nlp.utils.cache_manager import (
+    CacheManager,
     performance_monitor,
     memory_monitor
 )
-from ..utils.config_manager import ConfigManager
+from nlp.utils.config_manager import ConfigManager
 import logging
 import time
 from typing import List, Dict, Any
@@ -15,44 +15,42 @@ from typing import List, Dict, Any
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title="Entity Recognition API",
-    description="实体识别API服务",
-    version="1.0.0"
+# 创建API路由器
+router = APIRouter(
+    prefix="/api/nlp/entities",
+    tags=["Entity Recognition"]
 )
 
-# 添加CORS中间件
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# 添加CORS中间件到主应用（不在子路由中添加）
+# 注意：CORS中间件需要在主应用的FastAPI实例上配置
 
 # 初始化实体识别模型
+# 加载配置
+config = ConfigManager.get_environment_config(prefix="NLP_") or {}
+
+# 初始化实体识别模型（不传参数）
 try:
-    # 加载配置
-    config = ConfigManager.get_environment_config(prefix="NLP_") or {}
-    
-    # 初始化实体识别模型
-    entity_model = EntityRecognitionModel(config)
-    
-    # 初始化API缓存
+    entity_model = EntityRecognitionModel()
+    logger.info("实体识别模型初始化成功")
+except Exception as e:
+    logger.error(f"实体识别模型初始化失败: {e}")
+    entity_model = None
+
+# 初始化API缓存
+try:
     cache_config = config.get('cache', {
         'type': 'memory',
         'ttl': 3600
     })
     api_cache = CacheManager(cache_config)
-    
-    logger.info("实体识别API初始化成功")
+    logger.info("缓存管理器初始化成功")
 except Exception as e:
-    logger.error(f"实体识别模型初始化失败: {e}")
-    # 在实际应用中，这里应该有错误处理机制
-    entity_model = None
+    logger.error(f"缓存管理器初始化失败: {e}")
     api_cache = None
 
-@app.post("/api/nlp/entities")
+logger.info("实体识别API初始化完成")
+
+@router.post("/")
 @performance_monitor
 @memory_monitor
 def recognize_entities(request: Dict[str, Any]):
@@ -144,7 +142,7 @@ def recognize_entities(request: Dict[str, Any]):
         logger.error(f"实体识别API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/entities/batch")
+@router.post("/batch")
 @performance_monitor
 @memory_monitor
 def batch_recognize_entities(request: Dict[str, Any]):
@@ -251,7 +249,7 @@ def batch_recognize_entities(request: Dict[str, Any]):
         logger.error(f"批量实体识别API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/entities/classify")
+@router.post("/classify")
 def classify_entities(request: Dict[str, Any]):
     """
     对实体进行分类
@@ -296,7 +294,7 @@ def classify_entities(request: Dict[str, Any]):
         logger.error(f"实体分类API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/entities/llm")
+@router.post("/llm")
 def analyze_with_llm(request: Dict[str, Any]):
     """
     使用LLM进行文本分析
@@ -345,7 +343,7 @@ def analyze_with_llm(request: Dict[str, Any]):
         logger.error(f"LLM分析API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/nlp/entities/info")
+@router.get("/info")
 def get_entity_info():
     """
     获取实体识别相关信息
@@ -379,3 +377,6 @@ def get_entity_info():
     except Exception as e:
         logger.error(f"获取实体信息API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# 导出 APIRouter 供主应用使用
+__all__ = ["router"]

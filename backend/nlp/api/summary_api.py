@@ -1,12 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from ..summary.summary_model import SummaryModel
-from ..utils.cache_manager import (
-    CacheManager, 
+from nlp.summary.summary_model import SummaryModel
+from nlp.utils.cache_manager import (
+    CacheManager,
     performance_monitor,
     memory_monitor
 )
-from ..utils.config_manager import ConfigManager
+from nlp.utils.config_manager import ConfigManager
 import logging
 import time
 from typing import List, Dict, Any
@@ -15,44 +15,40 @@ from typing import List, Dict, Any
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title="Summary API",
-    description="摘要生成API服务",
-    version="1.0.0"
+router = APIRouter(
+    prefix="/api/nlp/summary",
+    tags=["Summary"]
 )
 
-# 添加CORS中间件
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# 注意：CORS中间件需要在主应用的FastAPI实例上配置，不在子路由中添加
+
+# 初始化摘要模型
+# 加载配置
+config = ConfigManager.get_environment_config(prefix="NLP_") or {}
 
 # 初始化摘要模型
 try:
-    # 加载配置
-    config = ConfigManager.get_environment_config(prefix="NLP_") or {}
-    
-    # 初始化摘要模型
     summary_model = SummaryModel(config)
-    
-    # 初始化API缓存
+    logger.info("摘要模型初始化成功")
+except Exception as e:
+    logger.error(f"摘要模型初始化失败: {e}")
+    summary_model = None
+
+# 初始化API缓存
+try:
     cache_config = config.get('cache', {
         'type': 'memory',
         'ttl': 3600
     })
     api_cache = CacheManager(cache_config)
-    
-    logger.info("摘要模型API初始化成功")
+    logger.info("缓存管理器初始化成功")
 except Exception as e:
-    logger.error(f"摘要模型初始化失败: {e}")
-    # 在实际应用中，这里应该有错误处理机制
-    summary_model = None
+    logger.error(f"缓存管理器初始化失败: {e}")
     api_cache = None
 
-@app.post("/api/nlp/summary")
+logger.info("摘要API初始化完成")
+
+@router.post("/")
 @performance_monitor
 @memory_monitor
 def generate_summary(request: Dict[str, Any]):
@@ -144,7 +140,7 @@ def generate_summary(request: Dict[str, Any]):
         logger.error(f"摘要生成API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/summary/batch")
+@router.post("/batch")
 @performance_monitor
 @memory_monitor
 def batch_generate_summaries(request: Dict[str, Any]):
@@ -223,7 +219,7 @@ def batch_generate_summaries(request: Dict[str, Any]):
         logger.error(f"批量摘要生成API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/summary/keywords")
+@router.post("/keywords")
 def generate_keywords(request: Dict[str, Any]):
     """
     生成关键词摘要
@@ -276,7 +272,7 @@ def generate_keywords(request: Dict[str, Any]):
         logger.error(f"关键词摘要API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/summary/multilevel")
+@router.post("/multilevel")
 def generate_multilevel_summary(request: Dict[str, Any]):
     """
     生成多级摘要
@@ -333,7 +329,7 @@ def generate_multilevel_summary(request: Dict[str, Any]):
         logger.error(f"多级摘要API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/summary/complexity")
+@router.post("/complexity")
 def analyze_text_complexity(request: Dict[str, Any]):
     """
     分析文本复杂度
@@ -387,7 +383,7 @@ def analyze_text_complexity(request: Dict[str, Any]):
         logger.error(f"文本复杂度分析API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/nlp/summary/context")
+@router.post("/context")
 def generate_summary_with_context(request: Dict[str, Any]):
     """
     带上下文的摘要生成
@@ -443,7 +439,7 @@ def generate_summary_with_context(request: Dict[str, Any]):
         logger.error(f"带上下文摘要API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/nlp/summary/info")
+@router.get("/info")
 def get_summary_info():
     """
     获取摘要模型信息
@@ -479,3 +475,6 @@ def get_summary_info():
     except Exception as e:
         logger.error(f"获取摘要模型信息API错误: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# 导出 APIRouter 供主应用使用
+__all__ = ["router"]

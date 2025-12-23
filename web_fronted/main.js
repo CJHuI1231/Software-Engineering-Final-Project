@@ -58,18 +58,32 @@ fileInput.addEventListener("change", async () => {
 async function uploadPdfToBackend(file) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/pdf/upload`, {
             method: 'POST',
             body: formData,
         });
-        
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "文件上传失败");
+            // 尝试解析错误响应
+            const contentType = response.headers.get('content-type');
+            let errorMessage = `文件上传失败 (状态码: ${response.status})`;
+
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorMessage;
+            } else {
+                // 如果不是JSON，获取文本响应
+                const text = await response.text();
+                if (text && !text.startsWith('<')) {
+                    errorMessage = text;
+                }
+            }
+
+            throw new Error(errorMessage);
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error("上传错误:", error);
@@ -231,12 +245,26 @@ async function generateSummary(text) {
                 min_length: 30
             }),
         });
-        
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "摘要生成失败");
+            // 尝试解析错误响应
+            const contentType = response.headers.get('content-type');
+            let errorMessage = `摘要生成失败 (状态码: ${response.status})`;
+
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorMessage;
+            } else {
+                // 如果不是JSON，获取文本响应
+                const text = await response.text();
+                if (text && !text.startsWith('<')) {
+                    errorMessage = text;
+                }
+            }
+
+            throw new Error(errorMessage);
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error("摘要生成错误:", error);
@@ -303,12 +331,26 @@ async function generateKnowledgeGraph(text) {
                 relation_extraction: true
             }),
         });
-        
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "知识图谱生成失败");
+            // 尝试解析错误响应
+            const contentType = response.headers.get('content-type');
+            let errorMessage = `知识图谱生成失败 (状态码: ${response.status})`;
+
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorMessage;
+            } else {
+                // 如果不是JSON，获取文本响应
+                const text = await response.text();
+                if (text && !text.startsWith('<')) {
+                    errorMessage = text;
+                }
+            }
+
+            throw new Error(errorMessage);
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error("知识图谱生成错误:", error);

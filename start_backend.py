@@ -118,7 +118,7 @@ def main():
     
     # 导入主应用
     try:
-        from backend.nlp.main import create_app
+        from nlp.main import create_app
         app = create_app()
         logger.info("应用创建成功")
     except ImportError as e:
@@ -133,17 +133,17 @@ def main():
     # 启动服务器
     try:
         import uvicorn
-        
+
         logger.info(f"启动服务器，地址: {args.host}:{args.port}")
         logger.info(f"工作进程数: {args.workers}")
         logger.info(f"日志级别: {args.log_level}")
-        
+
         uvicorn.run(
             app,
             host=args.host,
             port=args.port,
-            reload=args.reload,
-            workers=1 if args.reload else args.workers,
+            reload=False,  # 禁用reload模式，因为已经通过docker自动重启
+            workers=1,  # 使用单进程，因为多进程需要应用导入字符串
             log_level=args.log_level
         )
     except KeyboardInterrupt:

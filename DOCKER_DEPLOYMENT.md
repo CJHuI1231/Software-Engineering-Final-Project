@@ -14,6 +14,7 @@
 2. 在项目根目录运行以下命令：
 
    ```bash
+   docker-compose build backend
    docker-compose up -d
    ```
 

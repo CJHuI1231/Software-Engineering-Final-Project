@@ -1,7 +1,11 @@
+import os
 import spacy
 from typing import List, Dict, Any
 from transformers import pipeline
 import logging
+
+# 设置 Hugging Face 镜像（解决国内访问问题）
+os.environ['HF_ENDPOINT'] = os.environ.get('HF_ENDPOINT', 'https://hf-mirror.com')
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)

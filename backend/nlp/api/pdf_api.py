@@ -12,10 +12,9 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'OCR'))
 from PDF_OCR import PdfOcrParser
 
-# 添加NLP模块路径
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from summary.summary_model import SummaryModel
-from entity_recognition.entity_recognition import EntityRecognitionModel
+# 使用绝对导入
+from nlp.summary.summary_model import SummaryModel
+from nlp.entity_recognition.entity_recognition import EntityRecognitionModel
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)
@@ -37,25 +36,49 @@ router = APIRouter(
     tags=["PDF Processing"]
 )
 
-# 初始化模型
-try:
-    # 初始化PDF OCR解析器
-    pdf_parser = PdfOcrParser(ocr_lang='chi_sim+eng')
-    logger.info("PDF OCR解析器初始化成功")
-    
-    # 初始化摘要模型
-    summary_model = SummaryModel({})
-    logger.info("摘要模型初始化成功")
-    
-    # 初始化实体识别模型
-    entity_model = EntityRecognitionModel({})
-    logger.info("实体识别模型初始化成功")
-    
-except Exception as e:
-    logger.error(f"模型初始化失败: {e}")
-    pdf_parser = None
-    summary_model = None
-    entity_model = None
+# 初始化模型变量
+pdf_parser = None
+summary_model = None
+entity_model = None
+
+# 延迟初始化模型（避免在导入时失败）
+def initialize_models():
+    """延迟初始化所有模型"""
+    global pdf_parser, summary_model, entity_model
+
+    try:
+        # 初始化PDF OCR解析器
+        pdf_parser = PdfOcrParser(ocr_lang='chi_sim+eng')
+        logger.info("PDF OCR解析器初始化成功")
+
+    except Exception as e:
+        logger.error(f"PDF OCR解析器初始化失败: {e}")
+
+    try:
+        # 初始化摘要模型
+        summary_model = SummaryModel({})
+        logger.info("摘要模型初始化成功")
+
+    except Exception as e:
+        logger.error(f"摘要模型初始化失败: {e}")
+
+    try:
+        # 初始化实体识别模型
+        entity_model = EntityRecognitionModel()
+        logger.info("实体识别模型初始化成功")
+
+    except Exception as e:
+        logger.error(f"实体识别模型初始化失败: {e}")
+
+# 在第一次使用时自动初始化模型
+models_initialized = False
+
+def ensure_models_initialized():
+    """确保模型已初始化"""
+    global models_initialized
+    if not models_initialized:
+        initialize_models()
+        models_initialized = True
 
 @router.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
@@ -75,6 +98,9 @@ async def upload_pdf(file: UploadFile = File(...)):
     }
     """
     try:
+        # 确保模型已初始化
+        ensure_models_initialized()
+
         # 检查文件类型
         if not file.filename.endswith('.pdf'):
             raise HTTPException(status_code=400, detail="只支持PDF文件")
@@ -159,7 +185,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 async def generate_pdf_summary(request: Dict[str, Any]):
     """
     为PDF文本生成摘要
-    
+
     请求格式:
     {
         "file_id": "uuid",
@@ -168,7 +194,7 @@ async def generate_pdf_summary(request: Dict[str, Any]):
         "max_length": 150,
         "min_length": 30
     }
-    
+
     响应格式:
     {
         "status": "success",
@@ -179,6 +205,8 @@ async def generate_pdf_summary(request: Dict[str, Any]):
     }
     """
     try:
+        # 确保模型已初始化
+        ensure_models_initialized()
         # 检查模型是否初始化
         if not summary_model:
             raise HTTPException(status_code=503, detail="摘要生成服务暂时不可用")
@@ -232,7 +260,7 @@ async def generate_pdf_summary(request: Dict[str, Any]):
 async def extract_pdf_entities(request: Dict[str, Any]):
     """
     从PDF文本中提取实体
-    
+
     请求格式:
     {
         "file_id": "uuid",
@@ -240,7 +268,7 @@ async def extract_pdf_entities(request: Dict[str, Any]):
         "entity_types": ["PERSON", "ORG", "DATE", "LOCATION"],
         "relation_extraction": true
     }
-    
+
     响应格式:
     {
         "status": "success",
@@ -250,6 +278,8 @@ async def extract_pdf_entities(request: Dict[str, Any]):
     }
     """
     try:
+        # 确保模型已初始化
+        ensure_models_initialized()
         # 检查模型是否初始化
         if not entity_model:
             raise HTTPException(status_code=503, detail="实体识别服务暂时不可用")
@@ -315,10 +345,13 @@ async def generate_knowledge_graph(request: Dict[str, Any]):
     }
     """
     try:
+        # 确保模型已初始化
+        ensure_models_initialized()
+
         # 检查模型是否初始化
         if not entity_model:
             raise HTTPException(status_code=503, detail="实体识别服务暂时不可用")
-        
+
         # 获取请求参数
         text = request.get('text', '')
         entity_types = request.get('entity_types', [])

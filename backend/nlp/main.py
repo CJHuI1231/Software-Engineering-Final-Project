@@ -127,18 +127,14 @@ class NLPService:
         注册API路由
         """
         try:
-            # 导入API模块
+            # 导入API路由器（使用不同的变量名避免冲突）
             from nlp.api.entity_api import router as entity_router
             from nlp.api.summary_api import router as summary_router
             from nlp.api.pdf_api import router as pdf_router
             
-            # 注册实体识别API
-            self.app.include_router(entity_router, prefix="/api/nlp/entities")
-            
-            # 注册摘要API
-            self.app.include_router(summary_router, prefix="/api/nlp/summary")
-            
-            # 注册PDF处理API
+            # 注册路由器
+            self.app.include_router(entity_router, prefix="/api/nlp")
+            self.app.include_router(summary_router, prefix="/api/nlp")
             self.app.include_router(pdf_router, prefix="/api/pdf")
             
             # 注册健康检查
