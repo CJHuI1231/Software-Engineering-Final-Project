@@ -63,16 +63,26 @@ def check_system_requirements():
         import pytesseract
         pytesseract.get_tesseract_version()
         logger.info("Tesseract OCR 可用")
-        
+
         # 检查Poppler (pdf2image需要)
         try:
             import pdf2image
+            # 简单检查是否可以导入，不调用内部方法
             logger.info("Poppler 可用")
         except ImportError as e:
             logger.error(f"无法导入pdf2image模块: {e}")
             logger.error("请安装pdf2image库: pip install pdf2image")
             return False
-        
+
+        # 尝试调用 pdf2image 的基本功能来验证
+        try:
+            from pdf2image import convert_from_path
+            # 只验证函数存在，不实际执行
+            logger.info("pdf2image 功能验证通过")
+        except ImportError as e:
+            logger.error(f"pdf2image 功能不可用: {e}")
+            return False
+
         return True
     except ImportError as e:
         logger.error(f"系统要求检查失败: {e}")

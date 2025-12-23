@@ -139,7 +139,7 @@ class NLPService:
             self.app.include_router(summary_router, prefix="/api/nlp/summary")
             
             # 注册PDF处理API
-            self.app.include_router(pdf_router)
+            self.app.include_router(pdf_router, prefix="/api/pdf")
             
             # 注册健康检查
             @self.app.get("/health")

@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     # 安装Tesseract OCR（如果需要）
     tesseract-ocr \
     tesseract-ocr-chi-sim \
+    # 安装curl（用于健康检查）
+    curl \
     # 安装其他系统依赖
     && pip install --no-cache-dir -r requirements.txt \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -30,7 +32,7 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1
 
 # 运行服务
-CMD ["uvicorn", "nlp.main_fastapi:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["python", "/app/start_backend.py", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
 
 
 

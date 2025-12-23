@@ -6,8 +6,9 @@ let extractedText = "";
 let fileId = null;
 
 // API基础URL - 根据环境自动检测
-const API_BASE_URL = window.location.hostname === 'localhost' && window.location.port === '8080' 
-    ? "/api"  // Docker环境，通过nginx代理
+// 如果通过nginx代理访问，使用相对路径；否则使用绝对路径
+const API_BASE_URL = window.location.port === '8080' || window.location.port === ''
+    ? "/api"  // Docker环境或生产环境，通过nginx代理
     : "http://localhost:8000/api";  // 本地开发环境
 
 const canvas = document.getElementById("pdfCanvas");

@@ -26,10 +26,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr-chi-tra \
     # PDF处理工具
     poppler-utils \
-    # 常用工具
+    # 常用工具（curl必须用于健康检查）
     curl \
     wget \
     git \
+    # 网络工具
+    iputils-ping \
     # 清理缓存以减小镜像大小
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
