@@ -47,7 +47,8 @@
 2. 在项目根目录运行以下命令：
 
    ```bash
-   docker-compose up -d
+   docker-compose up -d --build backend
+   docker-compose up -d frontend
    ```
 
 3. 等待容器启动完成（可能需要几分钟，首次启动需要下载镜像和安装依赖）
